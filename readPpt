@@ -1,0 +1,54 @@
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PowerPointToJson {
+    
+    public static void main(String[] args) {
+        String filePath = "path/to/your/file.pptx";
+        try {
+            JsonObject pptJson = parsePptxToJson(filePath);
+            System.out.println(new Gson().toJson(pptJson));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static JsonObject parsePptxToJson(String filePath) throws IOException {
+        FileInputStream inputStream = new FileInputStream(filePath);
+        XMLSlideShow ppt = new XMLSlideShow(OPCPackage.open(inputStream));
+        
+        JsonObject pptJson = new JsonObject();
+        JsonArray slidesJson = new JsonArray();
+
+        for (XSLFSlide slide : ppt.getSlides()) {
+            JsonObject slideJson = new JsonObject();
+            String title = slide.getTitle();
+            slideJson.addProperty("title", title == null ? "Untitled" : title);
+            
+            List<String> content = new ArrayList<>();
+            for (XSLFShape shape : slide.getShapes()) {
+                if (shape instanceof XSLFTextShape) {
+                    XSLFTextShape textShape = (XSLFTextShape) shape;
+                    content.add(textShape.getText());
+                }
+            }
+            slideJson.add("content", new Gson().toJsonTree(content));
+            slidesJson.add(slideJson);
+        }
+
+        pptJson.add("slides", slidesJson);
+        inputStream.close();
+        return pptJson;
+    }
+}
