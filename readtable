@@ -1,0 +1,69 @@
+import java.util.ArrayList;
+import java.util.List;
+
+// Class to hold table cell data
+class TableCellData {
+    private String text;
+
+    public TableCellData(String text) {
+        this.text = text;
+    }
+
+    public String getText() {
+        return text;
+    }
+}
+
+// Class to hold a row of table data
+class TableRowData {
+    private List<TableCellData> cells = new ArrayList<>();
+
+    public void addCell(TableCellData cellData) {
+        cells.add(cellData);
+    }
+
+    public List<TableCellData> getCells() {
+        return cells;
+    }
+}
+
+// Class to hold the entire table data
+class TableData {
+    private List<TableRowData> rows = new ArrayList<>();
+
+    public void addRow(TableRowData rowData) {
+        rows.add(rowData);
+    }
+
+    public List<TableRowData> getRows() {
+        return rows;
+    }
+}
+
+// Class to represent the slide data
+class SlideData {
+    private int slideNumber;
+    private String textContent;
+    private List<TableData> tables = new ArrayList<>();
+
+    public SlideData(int slideNumber, String textContent) {
+        this.slideNumber = slideNumber;
+        this.textContent = textContent;
+    }
+
+    public int getSlideNumber() {
+        return slideNumber;
+    }
+
+    public String getTextContent() {
+        return textContent;
+    }
+
+    public List<TableData> getTables() {
+        return tables;
+    }
+
+    public void addTable(TableData tableData) {
+        tables.add(tableData);
+    }
+}
