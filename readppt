@@ -1,0 +1,76 @@
+import org.apache.poi.xslf.usermodel.*;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PowerPointTableExtractor {
+    public static void main(String[] args) {
+        String filePath = "your_presentation.pptx";
+
+        List<SlideData> parsedSlides = parsePptx(filePath);
+
+        // Example: Printing the structured data
+        for (SlideData slideData : parsedSlides) {
+            System.out.println("Slide " + slideData.getSlideNumber() + ":");
+            System.out.println("Text Content: " + slideData.getTextContent());
+
+            for (TableData table : slideData.getTables()) {
+                for (TableRowData row : table.getRows()) {
+                    for (TableCellData cell : row.getCells()) {
+                        System.out.print(cell.getText() + "\t");
+                    }
+                    System.out.println();
+                }
+            }
+            System.out.println("\n" + "=".repeat(40) + "\n");
+        }
+    }
+
+    private static List<SlideData> parsePptx(String filePath) {
+        List<SlideData> slidesData = new ArrayList<>();
+
+        try (FileInputStream fis = new FileInputStream(filePath)) {
+            XMLSlideShow ppt = new XMLSlideShow(fis);
+            List<XSLFSlide> slides = ppt.getSlides();
+
+            for (XSLFSlide slide : slides) {
+                StringBuilder slideTextContent = new StringBuilder();
+                SlideData slideData = new SlideData(slides.indexOf(slide) + 1, "");
+
+                for (XSLFShape shape : slide.getShapes()) {
+                    if (shape instanceof XSLFTextShape) {
+                        XSLFTextShape textShape = (XSLFTextShape) shape;
+                        slideTextContent.append(textShape.getText()).append(" ");
+                    } else if (shape instanceof XSLFTable) {
+                        XSLFTable table = (XSLFTable) shape;
+                        TableData tableData = extractTableData(table);
+                        slideData.addTable(tableData);
+                    }
+                }
+
+                slideData = new SlideData(slides.indexOf(slide) + 1, slideTextContent.toString().trim());
+                slidesData.add(slideData);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return slidesData;
+    }
+
+    private static TableData extractTableData(XSLFTable table) {
+        TableData tableData = new TableData();
+
+        for (XSLFTableRow row : table) {
+            TableRowData rowData = new TableRowData();
+            for (XSLFTableCell cell : row.getCells()) {
+                rowData.addCell(new TableCellData(cell.getText()));
+            }
+            tableData.addRow(rowData);
+        }
+
+        return tableData;
+    }
+}
