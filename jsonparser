@@ -1,0 +1,55 @@
+import org.json.JSONObject;
+import org.json.JSONArray;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class JsonParser {
+
+    // Function to parse the JSON file and return a JSONObject
+    public static JSONObject parseJsonFile(String filePath) throws IOException {
+        // Read the content of the file as a string
+        String content = new String(Files.readAllBytes(Paths.get(filePath)));
+
+        // Create a JSONObject from the content
+        return new JSONObject(content);
+    }
+
+    // Function to query a key in the JSONObject
+    public static Object queryJson(JSONObject jsonObject, String key) {
+        if (!jsonObject.has(key)) {
+            return "Key not found!";
+        }
+
+        // Get the value associated with the key
+        Object value = jsonObject.get(key);
+
+        // Return value based on its type
+        if (value instanceof JSONObject) {
+            return "Nested Object: " + value.toString();
+        } else if (value instanceof JSONArray) {
+            return "Array: " + value.toString();
+        } else {
+            return value;
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            // Parse the JSON file (ensure the correct file path)
+            String filePath = "example.json"; // Your JSON file path
+            JSONObject jsonObject = parseJsonFile(filePath);
+
+            // Query the JSON object using a key
+            String key = "name";  // You can change this key to query different values
+            Object result = queryJson(jsonObject, key);
+
+            // Print the result
+            System.out.println("Value for key '" + key + "': " + result);
+        } catch (IOException e) {
+            System.out.println("Error reading the file: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
+        }
+    }
+}
