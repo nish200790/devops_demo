@@ -1,0 +1,35 @@
+import java.nio.file.*;
+import java.util.concurrent.TimeUnit;
+
+public class FilePolling {
+    
+    public static boolean pollForFile(String directory, String fileName, int timeoutInSeconds) throws InterruptedException {
+        Path dirPath = Paths.get(directory);
+        long timeout = TimeUnit.SECONDS.toMillis(timeoutInSeconds);
+        long startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() - startTime < timeout) {
+            if (Files.exists(dirPath.resolve(fileName))) {
+                System.out.println("File found: " + fileName);
+                return true;
+            }
+            Thread.sleep(1000); // Poll every second
+        }
+
+        System.out.println("File not found within the timeout period.");
+        return false;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        String directory = "path/to/your/directory";
+        String fileName = "yourfile.txt";
+        
+        boolean fileFound = pollForFile(directory, fileName, 60);
+        
+        if (fileFound) {
+            // File found, proceed with your logic
+        } else {
+            // Handle file not found case
+        }
+    }
+}
